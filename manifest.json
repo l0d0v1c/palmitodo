@@ -4,7 +4,7 @@
   "description": "Application de gestion de tâches minimaliste style Palm OS",
   "start_url": "./",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#9b9e84",
   "theme_color": "#9b9e84",
   "orientation": "portrait",

@@ -26,27 +26,33 @@
 
 body {
     font-family: 'VT323', monospace;
-    background: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    background: var(--palm-green);
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
     font-size: 16px;
 }
 
 .palm-device {
-    width: 320px;
+    width: 100vw;
+    height: 100vh;
     background: var(--palm-green);
-    border: 3px solid var(--palm-dark);
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .palm-screen {
     display: flex;
     flex-direction: column;
-    height: 480px;
+    height: 100%;
     background: var(--palm-green);
     position: relative;
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
 }
 
 /* Header */
@@ -98,8 +104,8 @@ body {
 .task-item {
     display: flex;
     align-items: center;
-    padding: 1px 4px;
-    min-height: 20px;
+    padding: 4px 6px;
+    min-height: 28px;
     border-bottom: 1px dotted var(--palm-shadow);
     cursor: pointer;
     position: relative;
@@ -115,22 +121,22 @@ body {
 }
 
 .task-checkbox {
-    width: 13px;
-    height: 13px;
+    width: 16px;
+    height: 16px;
     margin-right: 4px;
     cursor: pointer;
     accent-color: var(--palm-dark);
 }
 
 .task-priority {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     border: 1px solid var(--palm-dark);
     background: var(--palm-dark);
     color: var(--palm-green);
     text-align: center;
-    line-height: 12px;
-    font-size: 12px;
+    line-height: 16px;
+    font-size: 14px;
     margin-right: 4px;
     cursor: pointer;
     flex-shrink: 0;
@@ -144,7 +150,7 @@ body {
 
 .task-text {
     flex: 1;
-    font-size: 16px;
+    font-size: 20px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -153,7 +159,7 @@ body {
 
 .task-text-input {
     flex: 1;
-    font-size: 16px;
+    font-size: 20px;
     font-family: inherit;
     background: transparent;
     border: none;
@@ -243,6 +249,9 @@ body {
     font-size: 14px;
     cursor: pointer;
     height: 28px;
+    color: var(--palm-dark);
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .palm-button:active {
