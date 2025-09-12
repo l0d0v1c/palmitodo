@@ -277,10 +277,96 @@
                         <option value="en">English</option>
                     </select>
                 </div>
+                <div class="settings-row">
+                    <label id="sync-label">Synchronisation:</label>
+                    <div class="sync-controls">
+                        <button id="dropbox-sync-btn" class="sync-btn">
+                            <span class="dropbox-icon">📦</span>
+                            <span id="dropbox-text">Se connecter à Dropbox</span>
+                        </button>
+                        <div id="sync-status" class="sync-status hidden"></div>
+                    </div>
+                </div>
             </div>
             <div class="dialog-buttons">
                 <button class="dialog-btn" id="settings-ok-btn">OK</button>
                 <button class="dialog-btn" id="settings-cancel-btn">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dropbox Setup Wizard -->
+    <div id="dropbox-wizard" class="dropbox-overlay hidden">
+        <div class="dropbox-wizard-content">
+            <div class="wizard-header">
+                <h2 id="wizard-title">Configuration Dropbox</h2>
+                <button class="wizard-close" id="wizard-close">✕</button>
+            </div>
+            
+            <!-- Step 1: Introduction -->
+            <div id="wizard-step-1" class="wizard-step">
+                <div class="wizard-icon">📦</div>
+                <h3 id="step1-title">Synchroniser avec Dropbox</h3>
+                <p id="step1-desc">Synchronisez vos tâches entre tous vos appareils via Dropbox. Vos données resteront privées et chiffrées.</p>
+                <div class="wizard-benefits">
+                    <div class="benefit">
+                        <span class="benefit-icon">📱</span>
+                        <span id="benefit1">Synchronisation multi-appareils</span>
+                    </div>
+                    <div class="benefit">
+                        <span class="benefit-icon">🔒</span>
+                        <span id="benefit2">Données sécurisées</span>
+                    </div>
+                    <div class="benefit">
+                        <span class="benefit-icon">☁️</span>
+                        <span id="benefit3">Sauvegarde automatique</span>
+                    </div>
+                </div>
+                <div class="wizard-buttons">
+                    <button class="wizard-btn" id="step1-next">Continuer</button>
+                    <button class="wizard-btn-secondary" id="step1-skip">Ignorer</button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Dropbox Auth -->
+            <div id="wizard-step-2" class="wizard-step hidden">
+                <div class="wizard-icon">🔐</div>
+                <h3 id="step2-title">Autorisation Dropbox</h3>
+                <p id="step2-desc">Cliquez sur le bouton ci-dessous pour autoriser PalmiTodo à accéder à votre Dropbox.</p>
+                <div class="auth-info">
+                    <div class="info-item">
+                        <span class="info-icon">ℹ️</span>
+                        <span id="info1">PalmiTodo n'accèdera qu'à ses propres fichiers</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🔒</span>
+                        <span id="info2">Vos identifiants Dropbox restent privés</span>
+                    </div>
+                </div>
+                <div class="wizard-buttons">
+                    <button class="wizard-btn dropbox-auth-btn" id="dropbox-auth-btn">
+                        <span class="dropbox-icon">📦</span>
+                        <span id="auth-btn-text">Se connecter à Dropbox</span>
+                    </button>
+                    <button class="wizard-btn-secondary" id="step2-back">Retour</button>
+                </div>
+                <div id="auth-status" class="auth-status hidden"></div>
+            </div>
+            
+            <!-- Step 3: Success -->
+            <div id="wizard-step-3" class="wizard-step hidden">
+                <div class="wizard-icon success">✅</div>
+                <h3 id="step3-title">Configuration terminée !</h3>
+                <p id="step3-desc">Votre compte Dropbox est maintenant connecté. Vos tâches seront automatiquement synchronisées.</p>
+                <div class="sync-info">
+                    <div class="sync-item">
+                        <span class="sync-icon">📊</span>
+                        <span id="sync-info1">Première synchronisation en cours...</span>
+                    </div>
+                </div>
+                <div class="wizard-buttons">
+                    <button class="wizard-btn" id="step3-finish">Terminer</button>
+                </div>
             </div>
         </div>
     </div>

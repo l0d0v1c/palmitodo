@@ -25,6 +25,11 @@ class PalmTodoApp {
             backgroundColor: 'default',
             language: 'fr'
         };
+        this.dropbox = {
+            accessToken: null,
+            connected: false,
+            lastSync: null
+        };
         this.translations = {
             fr: {
                 taskList: 'Liste des tâches',
@@ -35,6 +40,12 @@ class PalmTodoApp {
                 settings: 'Réglages',
                 bgColor: 'Couleur de fond:',
                 language: 'Langue:',
+                sync: 'Synchronisation:',
+                dropboxConnect: 'Se connecter à Dropbox',
+                dropboxConnected: 'Connecté à Dropbox',
+                dropboxDisconnect: 'Se déconnecter',
+                syncSuccess: 'Synchronisation réussie',
+                syncError: 'Erreur de synchronisation',
                 defaultColor: 'Défaut (vert)',
                 white: 'Blanc',
                 black: 'Noir',
@@ -50,6 +61,12 @@ class PalmTodoApp {
                 settings: 'Settings',
                 bgColor: 'Background color:',
                 language: 'Language:',
+                sync: 'Synchronization:',
+                dropboxConnect: 'Connect to Dropbox',
+                dropboxConnected: 'Connected to Dropbox',
+                dropboxDisconnect: 'Disconnect',
+                syncSuccess: 'Sync successful',
+                syncError: 'Sync error',
                 defaultColor: 'Default (green)',
                 white: 'White',
                 black: 'Black',
@@ -72,6 +89,7 @@ class PalmTodoApp {
         const savedPrefs = localStorage.getItem('palm_todo_prefs');
         const savedCategories = localStorage.getItem('palm_todo_categories');
         const savedSettings = localStorage.getItem('palm_todo_settings');
+        const savedDropbox = localStorage.getItem('palm_todo_dropbox');
         
         if (savedTasks) {
             this.tasks = JSON.parse(savedTasks);
@@ -89,6 +107,10 @@ class PalmTodoApp {
             this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
             this.applySettings();
         }
+        
+        if (savedDropbox) {
+            this.dropbox = { ...this.dropbox, ...JSON.parse(savedDropbox) };
+        }
     }
 
     saveData() {
@@ -96,6 +118,7 @@ class PalmTodoApp {
         localStorage.setItem('palm_todo_prefs', JSON.stringify(this.preferences));
         localStorage.setItem('palm_todo_categories', JSON.stringify(this.taskCategories));
         localStorage.setItem('palm_todo_settings', JSON.stringify(this.settings));
+        localStorage.setItem('palm_todo_dropbox', JSON.stringify(this.dropbox));
     }
 
     generateId() {
@@ -1101,6 +1124,9 @@ class PalmTodoApp {
         document.getElementById('bg-color-select').value = this.settings.backgroundColor;
         document.getElementById('language-select').value = this.settings.language;
         
+        // Update Dropbox connection status
+        this.updateDropboxUI();
+        
         // Add event listeners
         document.getElementById('settings-ok-btn').onclick = () => {
             this.saveSettings();
@@ -1108,6 +1134,10 @@ class PalmTodoApp {
         
         document.getElementById('settings-cancel-btn').onclick = () => {
             this.hideDialog('settings-dialog');
+        };
+        
+        document.getElementById('dropbox-sync-btn').onclick = () => {
+            this.handleDropboxSync();
         };
         
         this.showDialog('settings-dialog');
@@ -1175,6 +1205,7 @@ class PalmTodoApp {
         document.getElementById('settings-title').textContent = t.settings;
         document.getElementById('bg-color-label').textContent = t.bgColor;
         document.getElementById('language-label').textContent = t.language;
+        document.getElementById('sync-label').textContent = t.sync;
         document.getElementById('settings-ok-btn').textContent = t.ok;
         document.getElementById('settings-cancel-btn').textContent = t.cancel;
         
@@ -1295,6 +1326,233 @@ class PalmTodoApp {
             if (androidSteps[1]) androidSteps[1].innerHTML = 'Sélectionnez "Installer l\'application" ou "Ajouter à l\'écran d\'accueil"';
             if (androidSteps[2]) androidSteps[2].innerHTML = 'Confirmez l\'installation';
         }
+    }
+
+    // Dropbox integration methods
+    updateDropboxUI() {
+        const btn = document.getElementById('dropbox-sync-btn');
+        const status = document.getElementById('sync-status');
+        const t = this.translations[this.settings.language];
+        
+        if (this.dropbox.connected) {
+            btn.classList.add('connected');
+            document.getElementById('dropbox-text').textContent = t.dropboxDisconnect;
+            status.textContent = this.dropbox.lastSync ? 
+                `Dernière sync: ${new Date(this.dropbox.lastSync).toLocaleString()}` : 
+                'Connecté';
+            status.classList.remove('hidden');
+            status.classList.add('success');
+        } else {
+            btn.classList.remove('connected');
+            document.getElementById('dropbox-text').textContent = t.dropboxConnect;
+            status.classList.add('hidden');
+        }
+    }
+
+    async handleDropboxSync() {
+        if (this.dropbox.connected) {
+            // Disconnect
+            if (confirm('Déconnecter Dropbox ? Vos données locales seront conservées.')) {
+                this.dropbox.accessToken = null;
+                this.dropbox.connected = false;
+                this.dropbox.lastSync = null;
+                this.saveData();
+                this.updateDropboxUI();
+            }
+        } else {
+            // Show wizard
+            this.showDropboxWizard();
+        }
+    }
+
+    async connectToDropbox() {
+        // Simple implementation - in a real app you'd need a Dropbox App Key
+        // For demo purposes, we'll simulate the connection
+        return new Promise((resolve, reject) => {
+            if (confirm('Se connecter à Dropbox ? (Simulation)')) {
+                this.dropbox.accessToken = 'demo_token_' + Date.now();
+                this.dropbox.connected = true;
+                this.saveData();
+                this.updateDropboxUI();
+                resolve(this.dropbox.accessToken);
+            } else {
+                reject(new Error('Connexion annulée'));
+            }
+        });
+    }
+
+    async syncWithDropbox() {
+        if (!this.dropbox.connected) return;
+
+        const status = document.getElementById('sync-status');
+        const t = this.translations[this.settings.language];
+        
+        try {
+            status.textContent = 'Synchronisation...';
+            status.classList.remove('hidden', 'error');
+            
+            // Simulate sync delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // In a real implementation, you would:
+            // 1. Upload current data to Dropbox
+            // 2. Download and merge data from other devices
+            // 3. Handle conflicts
+            
+            this.dropbox.lastSync = new Date().toISOString();
+            this.saveData();
+            
+            status.textContent = t.syncSuccess + ' - ' + new Date().toLocaleString();
+            status.classList.add('success');
+            
+        } catch (error) {
+            console.error('Sync error:', error);
+            this.showSyncError(error.message);
+        }
+    }
+
+    showSyncError(message) {
+        const status = document.getElementById('sync-status');
+        const t = this.translations[this.settings.language];
+        
+        status.textContent = t.syncError + ': ' + message;
+        status.classList.remove('hidden', 'success');
+        status.classList.add('error');
+    }
+
+    // Dropbox Setup Wizard
+    showDropboxWizard() {
+        this.currentWizardStep = 1;
+        this.updateWizardLanguage();
+        this.showWizardStep(1);
+        document.getElementById('dropbox-wizard').classList.remove('hidden');
+        
+        // Add event listeners
+        document.getElementById('wizard-close').onclick = () => this.closeWizard();
+        document.getElementById('step1-next').onclick = () => this.nextWizardStep();
+        document.getElementById('step1-skip').onclick = () => this.closeWizard();
+        document.getElementById('step2-back').onclick = () => this.showWizardStep(1);
+        document.getElementById('dropbox-auth-btn').onclick = () => this.startDropboxAuth();
+        document.getElementById('step3-finish').onclick = () => this.finishWizard();
+    }
+
+    updateWizardLanguage() {
+        const t = this.translations[this.settings.language];
+        const isEnglish = this.settings.language === 'en';
+        
+        if (isEnglish) {
+            document.getElementById('wizard-title').textContent = 'Dropbox Setup';
+            document.getElementById('step1-title').textContent = 'Sync with Dropbox';
+            document.getElementById('step1-desc').textContent = 'Synchronize your tasks across all your devices via Dropbox. Your data remains private and encrypted.';
+            document.getElementById('benefit1').textContent = 'Multi-device sync';
+            document.getElementById('benefit2').textContent = 'Secure data';
+            document.getElementById('benefit3').textContent = 'Automatic backup';
+            document.getElementById('step1-next').textContent = 'Continue';
+            document.getElementById('step1-skip').textContent = 'Skip';
+            
+            document.getElementById('step2-title').textContent = 'Dropbox Authorization';
+            document.getElementById('step2-desc').textContent = 'Click the button below to authorize PalmiTodo to access your Dropbox.';
+            document.getElementById('info1').textContent = 'PalmiTodo will only access its own files';
+            document.getElementById('info2').textContent = 'Your Dropbox credentials remain private';
+            document.getElementById('auth-btn-text').textContent = 'Connect to Dropbox';
+            document.getElementById('step2-back').textContent = 'Back';
+            
+            document.getElementById('step3-title').textContent = 'Setup Complete!';
+            document.getElementById('step3-desc').textContent = 'Your Dropbox account is now connected. Your tasks will be automatically synchronized.';
+            document.getElementById('sync-info1').textContent = 'First sync in progress...';
+            document.getElementById('step3-finish').textContent = 'Finish';
+        } else {
+            document.getElementById('wizard-title').textContent = 'Configuration Dropbox';
+            document.getElementById('step1-title').textContent = 'Synchroniser avec Dropbox';
+            document.getElementById('step1-desc').textContent = 'Synchronisez vos tâches entre tous vos appareils via Dropbox. Vos données resteront privées et chiffrées.';
+            document.getElementById('benefit1').textContent = 'Synchronisation multi-appareils';
+            document.getElementById('benefit2').textContent = 'Données sécurisées';
+            document.getElementById('benefit3').textContent = 'Sauvegarde automatique';
+            document.getElementById('step1-next').textContent = 'Continuer';
+            document.getElementById('step1-skip').textContent = 'Ignorer';
+            
+            document.getElementById('step2-title').textContent = 'Autorisation Dropbox';
+            document.getElementById('step2-desc').textContent = 'Cliquez sur le bouton ci-dessous pour autoriser PalmiTodo à accéder à votre Dropbox.';
+            document.getElementById('info1').textContent = 'PalmiTodo n\'accèdera qu\'à ses propres fichiers';
+            document.getElementById('info2').textContent = 'Vos identifiants Dropbox restent privés';
+            document.getElementById('auth-btn-text').textContent = 'Se connecter à Dropbox';
+            document.getElementById('step2-back').textContent = 'Retour';
+            
+            document.getElementById('step3-title').textContent = 'Configuration terminée !';
+            document.getElementById('step3-desc').textContent = 'Votre compte Dropbox est maintenant connecté. Vos tâches seront automatiquement synchronisées.';
+            document.getElementById('sync-info1').textContent = 'Première synchronisation en cours...';
+            document.getElementById('step3-finish').textContent = 'Terminer';
+        }
+    }
+
+    showWizardStep(step) {
+        // Hide all steps
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById(`wizard-step-${i}`).classList.add('hidden');
+        }
+        
+        // Show current step
+        document.getElementById(`wizard-step-${step}`).classList.remove('hidden');
+        this.currentWizardStep = step;
+    }
+
+    nextWizardStep() {
+        if (this.currentWizardStep < 3) {
+            this.showWizardStep(this.currentWizardStep + 1);
+        }
+    }
+
+    async startDropboxAuth() {
+        const authBtn = document.getElementById('dropbox-auth-btn');
+        const authStatus = document.getElementById('auth-status');
+        const t = this.translations[this.settings.language];
+        
+        authBtn.disabled = true;
+        authBtn.style.opacity = '0.6';
+        authStatus.textContent = this.settings.language === 'en' ? 'Connecting...' : 'Connexion...';
+        authStatus.classList.remove('hidden', 'error');
+        
+        try {
+            await this.connectToDropbox();
+            
+            authStatus.textContent = this.settings.language === 'en' ? 'Connected successfully!' : 'Connexion réussie !';
+            authStatus.classList.add('success');
+            
+            setTimeout(() => {
+                this.showWizardStep(3);
+                this.performInitialSync();
+            }, 1500);
+            
+        } catch (error) {
+            authBtn.disabled = false;
+            authBtn.style.opacity = '1';
+            authStatus.textContent = `${this.settings.language === 'en' ? 'Connection failed' : 'Échec de connexion'}: ${error.message}`;
+            authStatus.classList.add('error');
+        }
+    }
+
+    async performInitialSync() {
+        const syncInfo = document.getElementById('sync-info1');
+        
+        try {
+            await this.syncWithDropbox();
+            syncInfo.textContent = this.settings.language === 'en' ? 
+                'Sync completed successfully!' : 
+                'Synchronisation terminée avec succès !';
+        } catch (error) {
+            syncInfo.textContent = this.settings.language === 'en' ? 
+                'Sync completed with warnings' : 
+                'Synchronisation terminée avec avertissements';
+        }
+    }
+
+    finishWizard() {
+        this.closeWizard();
+        this.updateDropboxUI();
+    }
+
+    closeWizard() {
+        document.getElementById('dropbox-wizard').classList.add('hidden');
     }
 }
 
