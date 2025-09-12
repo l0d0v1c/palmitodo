@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PalmiTodo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#9b9e84">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+    <div class="palm-device">
+        <div class="palm-screen">
+            <!-- Header -->
+            <header class="palm-header">
+                <span class="header-title">Liste des tâches</span>
+                <button class="category-selector" id="category-selector">
+                    <span id="current-category">Toutes</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+            </header>
+
+            <!-- Task List -->
+            <main class="task-list-area">
+                <ul id="task-list" class="palm-task-list"></ul>
+            </main>
+
+            <!-- Bottom Buttons -->
+            <footer class="palm-footer">
+                <button class="palm-button" id="new-btn">Nouv.</button>
+                <button class="palm-button" id="details-btn">Détails...</button>
+                <button class="palm-button" id="show-btn">Afficher...</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Category Menu -->
+    <div id="category-dropdown" class="palm-dropdown hidden">
+        <div class="dropdown-list">
+            <div class="dropdown-item selected" data-category="all">Toutes</div>
+            <div class="dropdown-item" data-category="unfiled">Non classé</div>
+            <div class="dropdown-item" data-category="personal">Personnel</div>
+            <div class="dropdown-item" data-category="business">Professionnel</div>
+            <div class="dropdown-item" data-category="work">Travail</div>
+        </div>
+    </div>
+
+    <!-- Category Selection Menu for Detail Dialog -->
+    <div id="detail-category-menu" class="palm-dropdown hidden">
+        <div class="dropdown-list">
+            <div class="dropdown-item" data-category="bureau">Bureau</div>
+            <div class="dropdown-item" data-category="domicile">Domicile</div>
+            <div class="dropdown-item selected" data-category="unfiled">Non classé</div>
+            <div class="dropdown-item" data-category="edit">Modif.Cat</div>
+        </div>
+    </div>
+
+    <!-- Date Selection Menu for Detail Dialog -->
+    <div id="detail-date-menu" class="palm-dropdown hidden">
+        <div class="dropdown-list">
+            <div class="dropdown-item" data-date="">Sans date</div>
+            <div class="dropdown-item" data-date="today">Aujourd'hui</div>
+            <div class="dropdown-item" data-date="tomorrow">Demain</div>
+            <div class="dropdown-item" data-date="week">Dans 1 semaine</div>
+            <div class="dropdown-item" data-date="custom">Choisir...</div>
+        </div>
+    </div>
+
+    <!-- Task Detail Dialog -->
+    <div id="detail-dialog" class="palm-dialog hidden">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <span>Tâche détaillée</span>
+                <button class="dialog-close">ⓘ</button>
+            </div>
+            <div class="dialog-body">
+                <div class="detail-row">
+                    <label>Priorité:</label>
+                    <div class="priority-buttons">
+                        <button class="priority-btn" data-priority="1">1</button>
+                        <button class="priority-btn" data-priority="2">2</button>
+                        <button class="priority-btn selected" data-priority="3">3</button>
+                        <button class="priority-btn" data-priority="4">4</button>
+                        <button class="priority-btn" data-priority="5">5</button>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <label>Catégorie:</label>
+                    <button class="category-dropdown" id="detail-category-btn">
+                        <span id="detail-category-text">Non classé</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <div class="detail-row">
+                    <label>Echéance:</label>
+                    <button class="date-dropdown">
+                        <span>Sans date</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <div class="detail-row">
+                    <label>Personnel:</label>
+                    <input type="checkbox" class="palm-checkbox">
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="dialog-btn" id="ok-btn">OK</button>
+                <button class="dialog-btn" id="cancel-btn">Annuler</button>
+                <button class="dialog-btn" id="delete-btn">Supprimer...</button>
+                <button class="dialog-btn" id="note-btn">Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences Dialog -->
+    <div id="prefs-dialog" class="palm-dialog hidden">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <span>Préférences: Tâches</span>
+                <button class="dialog-close">ⓘ</button>
+            </div>
+            <div class="dialog-body">
+                <div class="pref-row">
+                    <label>Trier par:</label>
+                    <button class="pref-dropdown">
+                        <span>Priorité, échéance</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <div class="pref-section">
+                    <div class="pref-item">
+                        <input type="checkbox" id="show-completed" class="palm-checkbox" checked>
+                        <label for="show-completed">Afficher tâches terminées</label>
+                    </div>
+                    <div class="pref-item">
+                        <input type="checkbox" id="show-due-only" class="palm-checkbox">
+                        <label for="show-due-only">Tâches à échéance seules</label>
+                    </div>
+                    <div class="pref-item">
+                        <input type="checkbox" id="record-completion" class="palm-checkbox">
+                        <label for="record-completion">Enregistrer date fin</label>
+                    </div>
+                    <div class="pref-item">
+                        <input type="checkbox" id="show-due-dates" class="palm-checkbox">
+                        <label for="show-due-dates">Afficher échéances</label>
+                    </div>
+                    <div class="pref-item">
+                        <input type="checkbox" id="show-priorities" class="palm-checkbox" checked>
+                        <label for="show-priorities">Afficher priorités</label>
+                    </div>
+                    <div class="pref-item">
+                        <input type="checkbox" id="show-categories" class="palm-checkbox">
+                        <label for="show-categories">Afficher catégories</label>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="dialog-btn" id="prefs-ok">OK</button>
+                <button class="dialog-btn" id="prefs-cancel">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selection Alert -->
+    <div id="selection-alert" class="palm-alert hidden">
+        <div class="alert-content">
+            <div class="alert-header">Sélection enregistrement</div>
+            <div class="alert-body">
+                <div class="alert-icon">ⓘ</div>
+                <div class="alert-text">
+                    Pour exécuter cette commande, sélectionnez un enregistrement en appuyant sur sa description.
+                </div>
+            </div>
+            <button class="alert-btn" id="alert-ok">OK</button>
+        </div>
+    </div>
+
+    <!-- Note Input -->
+    <div id="note-input" class="palm-note-input hidden">
+        <textarea id="task-note-field" placeholder="Entrez une note..."></textarea>
+        <div class="note-buttons">
+            <button class="note-btn" id="note-save">OK</button>
+            <button class="note-btn" id="note-cancel">Annuler</button>
+        </div>
+    </div>
+
+    <!-- Category Management Dialog -->
+    <div id="category-manager" class="palm-dialog hidden">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <span>Modifier cat</span>
+                <button class="dialog-close">ⓘ</button>
+            </div>
+            <div class="dialog-body">
+                <div class="category-manager-content">
+                    <div class="category-manager-list">
+                        <div class="category-manager-item">Bureau</div>
+                        <div class="category-manager-item">Domicile</div>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="dialog-btn" id="cat-ok">OK</button>
+                <button class="dialog-btn" id="cat-new">Nouv.</button>
+                <button class="dialog-btn" id="cat-rename">Renom.</button>
+                <button class="dialog-btn" id="cat-delete">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Picker Calendar -->
+    <div id="date-picker" class="palm-dialog hidden">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <span>Echéance</span>
+                <button class="dialog-close">ⓘ</button>
+            </div>
+            <div class="dialog-body">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" id="prev-year">◀</button>
+                        <span class="calendar-year" id="current-year">2025</span>
+                        <button class="calendar-nav" id="next-year">▶</button>
+                    </div>
+                    <div class="calendar-months">
+                        <div class="month-grid">
+                            <div class="month-cell" data-month="0">Jan</div>
+                            <div class="month-cell" data-month="1">Fév</div>
+                            <div class="month-cell" data-month="2">Mar</div>
+                            <div class="month-cell" data-month="3">Avr</div>
+                            <div class="month-cell" data-month="4">Mai</div>
+                            <div class="month-cell" data-month="5">Jun</div>
+                            <div class="month-cell" data-month="6">Jul</div>
+                            <div class="month-cell" data-month="7">Aoû</div>
+                            <div class="month-cell" data-month="8">Sep</div>
+                            <div class="month-cell" data-month="9">Oct</div>
+                            <div class="month-cell" data-month="10">Nov</div>
+                            <div class="month-cell" data-month="11">Déc</div>
+                        </div>
+                    </div>
+                    <div class="calendar-days" id="calendar-days">
+                        <!-- Days will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="dialog-btn" id="calendar-cancel">Annuler</button>
+                <button class="dialog-btn" id="calendar-today">Aujourd'hui</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js" type="module"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered');
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    showUpdateNotification(registration);
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => console.log('ServiceWorker registration failed'));
+            });
+        }
+
+        function showUpdateNotification(registration) {
+            if (confirm('Une nouvelle version de PalmiTodo est disponible. Mettre à jour maintenant ?')) {
+                registration.waiting.postMessage({type: 'SKIP_WAITING'});
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
