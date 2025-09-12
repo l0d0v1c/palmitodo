@@ -630,10 +630,8 @@ class PalmTodoApp {
                 li.classList.add('selected');
                 this.selectedTaskId = task.id;
                 
-                // Make text editable on double click or if already selected
-                if (e.detail === 2 || task.id === this.selectedTaskId) {
-                    this.makeTextEditable(textElement, task);
-                }
+                // Make text editable immediately on single click
+                this.makeTextEditable(textElement, task, e);
             });
 
             // Note icon (paper icon)
@@ -662,7 +660,7 @@ class PalmTodoApp {
         });
     }
 
-    makeTextEditable(textElement, task) {
+    makeTextEditable(textElement, task, clickEvent) {
         const currentText = textElement.textContent;
         
         // Create input field
@@ -671,10 +669,23 @@ class PalmTodoApp {
         input.className = 'task-text-input';
         input.value = currentText;
         
+        // Calculate approximate cursor position based on click
+        let cursorPosition = currentText.length;
+        if (clickEvent) {
+            const rect = textElement.getBoundingClientRect();
+            const clickX = clickEvent.clientX - rect.left;
+            const textWidth = rect.width;
+            const ratio = clickX / textWidth;
+            cursorPosition = Math.round(currentText.length * ratio);
+            cursorPosition = Math.max(0, Math.min(cursorPosition, currentText.length));
+        }
+        
         // Replace text with input
         textElement.replaceWith(input);
         input.focus();
-        input.select();
+        
+        // Set cursor position instead of selecting all
+        input.setSelectionRange(cursorPosition, cursorPosition);
         
         // Save on Enter or blur
         const saveText = () => {
@@ -1185,8 +1196,12 @@ class PalmTodoApp {
                            window.matchMedia('(display-mode: fullscreen)').matches ||
                            window.navigator.standalone === true;
 
-        // If not installed, show install prompt after 2 seconds
-        if (!isStandalone) {
+        // Detect platform - only show on mobile devices
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+
+        // If not installed AND on mobile device, show install prompt after 2 seconds
+        if (!isStandalone && isMobile) {
             setTimeout(() => {
                 this.showInstallPrompt();
             }, 2000);
@@ -1194,8 +1209,20 @@ class PalmTodoApp {
     }
 
     showInstallPrompt() {
+        // Don't show again if user already closed it
+        if (localStorage.getItem('install_prompt_closed') === 'true') {
+            return;
+        }
+
         const installPrompt = document.getElementById('install-prompt');
         const closeBtn = document.getElementById('close-install-prompt');
+        
+        // Detect browser language
+        const browserLang = navigator.language || navigator.userLanguage;
+        const isEnglish = browserLang.toLowerCase().startsWith('en');
+        
+        // Update install prompt text based on language
+        this.updateInstallPromptLanguage(isEnglish);
         
         // Detect platform
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -1206,9 +1233,6 @@ class PalmTodoApp {
         } else if (/android/i.test(userAgent)) {
             // Android
             document.getElementById('android-instructions').classList.remove('hidden');
-        } else {
-            // Desktop or other
-            document.getElementById('desktop-instructions').classList.remove('hidden');
         }
         
         // Show the prompt
@@ -1220,10 +1244,56 @@ class PalmTodoApp {
             // Remember that user closed the prompt
             localStorage.setItem('install_prompt_closed', 'true');
         };
+    }
+
+    updateInstallPromptLanguage(isEnglish) {
+        const installContent = document.querySelector('.install-content h2');
+        const iosTitle = document.querySelector('#ios-instructions h3');
+        const androidTitle = document.querySelector('#android-instructions h3');
+        const desktopTitle = document.querySelector('#desktop-instructions h3');
+        const desktopText = document.querySelector('#desktop-instructions p');
+        const closeBtn = document.getElementById('close-install-prompt');
         
-        // Don't show again if user already closed it
-        if (localStorage.getItem('install_prompt_closed') === 'true') {
-            installPrompt.classList.add('hidden');
+        if (isEnglish) {
+            // English translations
+            installContent.textContent = 'Install PalmiTodo';
+            if (iosTitle) iosTitle.textContent = 'On iOS (iPhone/iPad)';
+            if (androidTitle) androidTitle.textContent = 'On Android';
+            if (desktopTitle) desktopTitle.textContent = 'On Desktop';
+            if (desktopText) desktopText.textContent = 'Click the install icon in the address bar or use the browser menu to install the app.';
+            closeBtn.textContent = 'Close';
+            
+            // iOS instructions
+            const iosSteps = document.querySelectorAll('#ios-instructions ol li');
+            if (iosSteps[0]) iosSteps[0].innerHTML = 'Tap the <span class="icon-share">⎙</span> Share button';
+            if (iosSteps[1]) iosSteps[1].innerHTML = 'Scroll down and tap "Add to Home Screen"';
+            if (iosSteps[2]) iosSteps[2].innerHTML = 'Tap "Add"';
+            
+            // Android instructions
+            const androidSteps = document.querySelectorAll('#android-instructions ol li');
+            if (androidSteps[0]) androidSteps[0].innerHTML = 'Tap the menu <span class="icon-menu">⋮</span>';
+            if (androidSteps[1]) androidSteps[1].innerHTML = 'Select "Install app" or "Add to Home screen"';
+            if (androidSteps[2]) androidSteps[2].innerHTML = 'Confirm installation';
+        } else {
+            // French translations (default)
+            installContent.textContent = 'Installer PalmiTodo';
+            if (iosTitle) iosTitle.textContent = 'Sur iOS (iPhone/iPad)';
+            if (androidTitle) androidTitle.textContent = 'Sur Android';
+            if (desktopTitle) desktopTitle.textContent = 'Sur ordinateur';
+            if (desktopText) desktopText.textContent = 'Cliquez sur l\'icône d\'installation dans la barre d\'adresse ou utilisez le menu du navigateur pour installer l\'application.';
+            closeBtn.textContent = 'Fermer';
+            
+            // iOS instructions
+            const iosSteps = document.querySelectorAll('#ios-instructions ol li');
+            if (iosSteps[0]) iosSteps[0].innerHTML = 'Appuyez sur le bouton <span class="icon-share">⎙</span> Partager';
+            if (iosSteps[1]) iosSteps[1].innerHTML = 'Faites défiler et appuyez sur "Sur l\'écran d\'accueil"';
+            if (iosSteps[2]) iosSteps[2].innerHTML = 'Appuyez sur "Ajouter"';
+            
+            // Android instructions
+            const androidSteps = document.querySelectorAll('#android-instructions ol li');
+            if (androidSteps[0]) androidSteps[0].innerHTML = 'Appuyez sur le menu <span class="icon-menu">⋮</span>';
+            if (androidSteps[1]) androidSteps[1].innerHTML = 'Sélectionnez "Installer l\'application" ou "Ajouter à l\'écran d\'accueil"';
+            if (androidSteps[2]) androidSteps[2].innerHTML = 'Confirmez l\'installation';
         }
     }
 }
