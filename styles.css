@@ -71,6 +71,28 @@ body {
     letter-spacing: -0.5px;
 }
 
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.settings-btn {
+    background: var(--palm-dark);
+    color: var(--palm-green);
+    border: 1px solid var(--palm-green);
+    font-size: 18px;
+    padding: 0 4px;
+    cursor: pointer;
+    height: 20px;
+    line-height: 18px;
+}
+
+.settings-btn:active {
+    background: var(--palm-green);
+    color: var(--palm-dark);
+}
+
 .category-selector {
     display: flex;
     align-items: center;
@@ -417,6 +439,38 @@ body {
 .dialog-btn:active {
     background: var(--palm-dark);
     color: var(--palm-green);
+}
+
+/* Settings Dialog */
+#settings-dialog .dialog-buttons {
+    padding: 12px;
+}
+
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--palm-shadow);
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row label {
+    font-size: 16px;
+    color: var(--palm-dark);
+}
+
+.settings-select {
+    background: var(--palm-green);
+    border: 2px solid var(--palm-dark);
+    padding: 2px 4px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--palm-dark);
+    cursor: pointer;
 }
 
 /* Preferences Dialog */

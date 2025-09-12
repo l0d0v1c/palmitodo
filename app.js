@@ -21,6 +21,42 @@ class PalmTodoApp {
             showPriorities: true,
             showCategories: false
         };
+        this.settings = {
+            backgroundColor: 'default',
+            language: 'fr'
+        };
+        this.translations = {
+            fr: {
+                taskList: 'Liste des tâches',
+                all: 'Toutes',
+                new: 'Nouv.',
+                details: 'Détails...',
+                show: 'Afficher...',
+                settings: 'Réglages',
+                bgColor: 'Couleur de fond:',
+                language: 'Langue:',
+                defaultColor: 'Défaut (vert)',
+                white: 'Blanc',
+                black: 'Noir',
+                ok: 'OK',
+                cancel: 'Annuler'
+            },
+            en: {
+                taskList: 'Task List',
+                all: 'All',
+                new: 'New',
+                details: 'Details...',
+                show: 'Show...',
+                settings: 'Settings',
+                bgColor: 'Background color:',
+                language: 'Language:',
+                defaultColor: 'Default (green)',
+                white: 'White',
+                black: 'Black',
+                ok: 'OK',
+                cancel: 'Cancel'
+            }
+        };
         this.init();
     }
 
@@ -34,6 +70,7 @@ class PalmTodoApp {
         const savedTasks = localStorage.getItem('palm_todo_tasks');
         const savedPrefs = localStorage.getItem('palm_todo_prefs');
         const savedCategories = localStorage.getItem('palm_todo_categories');
+        const savedSettings = localStorage.getItem('palm_todo_settings');
         
         if (savedTasks) {
             this.tasks = JSON.parse(savedTasks);
@@ -46,12 +83,18 @@ class PalmTodoApp {
         if (savedCategories) {
             this.taskCategories = JSON.parse(savedCategories);
         }
+        
+        if (savedSettings) {
+            this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+            this.applySettings();
+        }
     }
 
     saveData() {
         localStorage.setItem('palm_todo_tasks', JSON.stringify(this.tasks));
         localStorage.setItem('palm_todo_prefs', JSON.stringify(this.preferences));
         localStorage.setItem('palm_todo_categories', JSON.stringify(this.taskCategories));
+        localStorage.setItem('palm_todo_settings', JSON.stringify(this.settings));
     }
 
     generateId() {
@@ -59,6 +102,11 @@ class PalmTodoApp {
     }
 
     setupEventListeners() {
+        // Settings button
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            this.showSettingsDialog();
+        });
+
         // Category selector
         document.getElementById('category-selector').addEventListener('click', () => {
             this.toggleCategoryDropdown();
@@ -1034,9 +1082,104 @@ class PalmTodoApp {
         
         this.hideDialog('date-picker');
     }
+
+    // Settings methods
+    showSettingsDialog() {
+        // Set current values
+        document.getElementById('bg-color-select').value = this.settings.backgroundColor;
+        document.getElementById('language-select').value = this.settings.language;
+        
+        // Add event listeners
+        document.getElementById('settings-ok-btn').onclick = () => {
+            this.saveSettings();
+        };
+        
+        document.getElementById('settings-cancel-btn').onclick = () => {
+            this.hideDialog('settings-dialog');
+        };
+        
+        this.showDialog('settings-dialog');
+    }
+
+    saveSettings() {
+        const bgColor = document.getElementById('bg-color-select').value;
+        const language = document.getElementById('language-select').value;
+        
+        this.settings.backgroundColor = bgColor;
+        this.settings.language = language;
+        
+        this.saveData();
+        this.applySettings();
+        this.hideDialog('settings-dialog');
+    }
+
+    applySettings() {
+        // Apply background color
+        const body = document.body;
+        const palmDevice = document.querySelector('.palm-device');
+        const palmScreen = document.querySelector('.palm-screen');
+        
+        switch(this.settings.backgroundColor) {
+            case 'white':
+                body.style.background = '#ffffff';
+                palmDevice.style.background = '#ffffff';
+                palmScreen.style.background = '#ffffff';
+                document.documentElement.style.setProperty('--palm-green', '#ffffff');
+                document.documentElement.style.setProperty('--palm-light', '#f0f0f0');
+                document.documentElement.style.setProperty('--palm-shadow', '#cccccc');
+                break;
+            case 'black':
+                body.style.background = '#000000';
+                palmDevice.style.background = '#000000';
+                palmScreen.style.background = '#000000';
+                document.documentElement.style.setProperty('--palm-green', '#000000');
+                document.documentElement.style.setProperty('--palm-light', '#333333');
+                document.documentElement.style.setProperty('--palm-shadow', '#666666');
+                break;
+            default:
+                body.style.background = '#9b9e84';
+                palmDevice.style.background = '#9b9e84';
+                palmScreen.style.background = '#9b9e84';
+                document.documentElement.style.setProperty('--palm-green', '#9b9e84');
+                document.documentElement.style.setProperty('--palm-light', '#c6c8b5');
+                document.documentElement.style.setProperty('--palm-shadow', '#6b6d5a');
+                break;
+        }
+        
+        // Apply language
+        this.updateLanguage();
+    }
+
+    updateLanguage() {
+        const t = this.translations[this.settings.language];
+        
+        // Update UI texts
+        document.getElementById('header-title').textContent = t.taskList;
+        document.getElementById('new-btn').textContent = t.new;
+        document.getElementById('details-btn').textContent = t.details;
+        document.getElementById('show-btn').textContent = t.show;
+        
+        // Update settings dialog
+        document.getElementById('settings-title').textContent = t.settings;
+        document.getElementById('bg-color-label').textContent = t.bgColor;
+        document.getElementById('language-label').textContent = t.language;
+        document.getElementById('settings-ok-btn').textContent = t.ok;
+        document.getElementById('settings-cancel-btn').textContent = t.cancel;
+        
+        // Update select options
+        const bgSelect = document.getElementById('bg-color-select');
+        bgSelect.options[0].text = t.defaultColor;
+        bgSelect.options[1].text = t.white;
+        bgSelect.options[2].text = t.black;
+        
+        // Update category if "All" is selected
+        if (this.currentCategory === 'all') {
+            document.getElementById('current-category').textContent = t.all;
+        }
+    }
 }
 
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new PalmTodoApp();
+    window.app = new PalmTodoApp();
 });
