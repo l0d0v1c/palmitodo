@@ -282,6 +282,87 @@ class PalmTodoApp {
         this.renderTasks();
     }
 
+    showPriorityDropdown(task, priorityElement) {
+        // Remove any existing dropdown
+        const existingDropdown = document.querySelector('.priority-inline-dropdown');
+        if (existingDropdown) {
+            existingDropdown.remove();
+        }
+
+        // Create dropdown
+        const dropdown = document.createElement('div');
+        dropdown.className = 'priority-inline-dropdown';
+        
+        // Position dropdown relative to priority element
+        const rect = priorityElement.getBoundingClientRect();
+        dropdown.style.position = 'absolute';
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = (rect.bottom + 2) + 'px';
+        dropdown.style.minWidth = '20px';
+        dropdown.style.width = 'auto';
+        dropdown.style.background = 'var(--palm-green)';
+        dropdown.style.border = '2px solid var(--palm-dark)';
+        dropdown.style.boxShadow = '2px 2px 0 var(--palm-shadow)';
+        dropdown.style.zIndex = '1000';
+
+        // Add priority options
+        for (let i = 1; i <= 5; i++) {
+            const option = document.createElement('div');
+            option.className = 'priority-option';
+            option.textContent = i;
+            option.style.padding = '2px 4px';
+            option.style.textAlign = 'center';
+            option.style.cursor = 'pointer';
+            option.style.borderBottom = '1px solid var(--palm-dark)';
+            
+            if (i === (task.priority || 3)) {
+                option.style.background = 'var(--palm-dark)';
+                option.style.color = 'var(--palm-green)';
+            }
+
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                task.priority = i;
+                this.saveData();
+                this.renderTasks();
+                dropdown.remove();
+            });
+
+            option.addEventListener('mouseenter', () => {
+                if (i !== (task.priority || 3)) {
+                    option.style.background = 'var(--palm-light)';
+                }
+            });
+
+            option.addEventListener('mouseleave', () => {
+                if (i !== (task.priority || 3)) {
+                    option.style.background = 'var(--palm-green)';
+                }
+            });
+
+            dropdown.appendChild(option);
+        }
+
+        // Remove last border
+        if (dropdown.lastChild) {
+            dropdown.lastChild.style.borderBottom = 'none';
+        }
+
+        document.body.appendChild(dropdown);
+
+        // Close dropdown when clicking outside
+        const closeDropdown = (e) => {
+            if (!dropdown.contains(e.target) && e.target !== priorityElement) {
+                dropdown.remove();
+                document.removeEventListener('click', closeDropdown);
+            }
+        };
+        
+        setTimeout(() => {
+            document.addEventListener('click', closeDropdown);
+        }, 0);
+    }
+
     showTaskDetails() {
         if (!this.selectedTaskId) {
             this.showSelectionAlert();
@@ -478,9 +559,7 @@ class PalmTodoApp {
                 priorityElement.textContent = task.priority || '3';
                 priorityElement.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    task.priority = ((task.priority || 3) % 5) + 1;
-                    this.saveData();
-                    this.renderTasks();
+                    this.showPriorityDropdown(task, priorityElement);
                 });
             }
 

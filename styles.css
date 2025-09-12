@@ -700,8 +700,21 @@ body {
     visibility: hidden !important;
 }
 
+/* Main category dropdown in header */
+.main-category-dropdown {
+    position: absolute;
+    top: 25px;
+    right: 4px;
+    width: 120px;
+    background: var(--palm-green);
+    border: 2px solid var(--palm-dark);
+    box-shadow: 4px 4px 0 var(--palm-shadow);
+    z-index: 300;
+}
+
 /* Make sure dropdowns are visible when not hidden */
-.palm-dropdown:not(.hidden) {
+.palm-dropdown:not(.hidden),
+.main-category-dropdown:not(.hidden) {
     display: block !important;
     visibility: visible !important;
 }
