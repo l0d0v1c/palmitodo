@@ -64,6 +64,7 @@ class PalmTodoApp {
         this.loadData();
         this.setupEventListeners();
         this.renderTasks();
+        this.checkInstallStatus();
     }
 
     loadData() {
@@ -1175,6 +1176,54 @@ class PalmTodoApp {
         // Update category if "All" is selected
         if (this.currentCategory === 'all') {
             document.getElementById('current-category').textContent = t.all;
+        }
+    }
+
+    checkInstallStatus() {
+        // Check if app is installed (running in standalone mode)
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                           window.matchMedia('(display-mode: fullscreen)').matches ||
+                           window.navigator.standalone === true;
+
+        // If not installed, show install prompt after 2 seconds
+        if (!isStandalone) {
+            setTimeout(() => {
+                this.showInstallPrompt();
+            }, 2000);
+        }
+    }
+
+    showInstallPrompt() {
+        const installPrompt = document.getElementById('install-prompt');
+        const closeBtn = document.getElementById('close-install-prompt');
+        
+        // Detect platform
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            // iOS
+            document.getElementById('ios-instructions').classList.remove('hidden');
+        } else if (/android/i.test(userAgent)) {
+            // Android
+            document.getElementById('android-instructions').classList.remove('hidden');
+        } else {
+            // Desktop or other
+            document.getElementById('desktop-instructions').classList.remove('hidden');
+        }
+        
+        // Show the prompt
+        installPrompt.classList.remove('hidden');
+        
+        // Add close button handler
+        closeBtn.onclick = () => {
+            installPrompt.classList.add('hidden');
+            // Remember that user closed the prompt
+            localStorage.setItem('install_prompt_closed', 'true');
+        };
+        
+        // Don't show again if user already closed it
+        if (localStorage.getItem('install_prompt_closed') === 'true') {
+            installPrompt.classList.add('hidden');
         }
     }
 }

@@ -785,6 +785,84 @@ body {
     visibility: visible !important;
 }
 
+/* Install Prompt Overlay */
+.install-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.install-content {
+    background: var(--palm-green);
+    border: 3px solid var(--palm-dark);
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 90%;
+    width: 320px;
+    box-shadow: 4px 4px 0 var(--palm-shadow);
+}
+
+.install-content h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    text-align: center;
+    color: var(--palm-dark);
+}
+
+.install-content h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: var(--palm-dark);
+}
+
+.install-instructions {
+    margin-bottom: 20px;
+}
+
+.platform-instructions ol {
+    padding-left: 20px;
+    color: var(--palm-dark);
+}
+
+.platform-instructions li {
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.icon-share, .icon-menu {
+    background: var(--palm-dark);
+    color: var(--palm-green);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.install-close-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--palm-green);
+    border: 2px solid var(--palm-dark);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--palm-dark);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.install-close-btn:active {
+    background: var(--palm-dark);
+    color: var(--palm-green);
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 12px;

@@ -1,4 +1,6 @@
-const CACHE_NAME = 'palmitodo-v1.2.0';
+importScripts('./version.js');
+
+const CACHE_NAME = `palmitodo-v${APP_VERSION}`;
 const urlsToCache = [
   './',
   './index.html',
@@ -7,11 +9,9 @@ const urlsToCache = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './VT323.ttf'
+  './VT323.ttf',
+  './version.js'
 ];
-
-// Version tracking
-const APP_VERSION = '1.2.0';
 
 self.addEventListener('install', event => {
   event.waitUntil(
