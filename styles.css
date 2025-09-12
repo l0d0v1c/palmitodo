@@ -51,7 +51,6 @@ body {
     height: 100%;
     background: var(--palm-green);
     position: relative;
-    padding-bottom: env(safe-area-inset-bottom);
     padding-top: env(safe-area-inset-top);
 }
 
@@ -256,6 +255,7 @@ body {
 .palm-footer {
     display: flex;
     padding: 4px;
+    padding-bottom: calc(4px + env(safe-area-inset-bottom));
     gap: 4px;
     background: var(--palm-green);
     border-top: 1px solid var(--palm-dark);
@@ -434,6 +434,9 @@ body {
     font-family: inherit;
     font-size: 12px;
     cursor: pointer;
+    color: var(--palm-dark);
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .dialog-btn:active {
